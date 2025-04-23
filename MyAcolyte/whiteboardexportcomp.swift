@@ -134,36 +134,36 @@ struct ExportOptionsView: View {
 }
 
 // Export option row
-struct ExportOptionRow: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.blue)
-                    .frame(width: 30, height: 30)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline)
-                    
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.vertical, 4)
-        }
-    }
-}
+//struct ExportOptionRow: View {
+//    let title: String
+//    let subtitle: String
+//    let icon: String
+//    let action: () -> Void
+//    
+//    var body: some View {
+//        Button(action: action) {
+//            HStack {
+//                Image(systemName: icon)
+//                    .font(.system(size: 18))
+//                    .foregroundColor(.blue)
+//                    .frame(width: 30, height: 30)
+//                
+//                VStack(alignment: .leading, spacing: 2) {
+//                    Text(title)
+//                        .font(.headline)
+//                    
+//                    Text(subtitle)
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                }
+//                
+//                Spacer()
+//                
+//                Image(systemName: "chevron.right")
+//                    .font(.caption)
+//                    .foregroundColor(.secondary)
+//            }
+//            .padding(.vertical, 4)
+//        }
+//    }
+//}
