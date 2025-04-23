@@ -7,6 +7,8 @@ struct FileItemListView: View {
     @State private var newName = ""
     @State private var showingPDFViewer = false
     @State private var showingNoteEditor = false
+    @State private var showingWhiteboard = false
+    @State private var selectedPDFId: String?
     
     var body: some View {
         ZStack {
@@ -21,7 +23,8 @@ struct FileItemListView: View {
                 ZStack {
                     Circle()
                         .fill(item.type == .folder ? Color.yellow.opacity(0.2) :
-                              item.fileType == .pdf ? Color.red.opacity(0.2) : Color.green.opacity(0.2))
+                              item.fileType == .pdf ? Color.red.opacity(0.2) :
+                              item.fileType == .note ? Color.green.opacity(0.2) : Color.blue.opacity(0.2))
                         .frame(width: 50, height: 50)
                     
                     if viewModel.selectionMode {
@@ -43,7 +46,8 @@ struct FileItemListView: View {
                             .onAppear {
                                 if item.type == .file {
                                     let nameWithoutExtension = item.name.replacingOccurrences(
-                                        of: item.fileType == .pdf ? ".pdf" : ".notes",
+                                        of: item.fileType == .pdf ? ".pdf" :
+                                            item.fileType == .note ? ".notes" : ".whiteboard",
                                         with: ""
                                     )
                                     newName = nameWithoutExtension
@@ -71,6 +75,10 @@ struct FileItemListView: View {
                                 Text("Note")
                                     .font(.caption)
                                     .foregroundColor(.green)
+                            } else if item.type == .whiteboard {
+                                Text("Whiteboard")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
                             } else {
                                 Text("Folder")
                                     .font(.caption)
@@ -150,6 +158,14 @@ struct FileItemListView: View {
                     Label("Open", systemImage: "folder")
                 }
             }
+            
+            if item.type == .file && item.fileType == .pdf {
+                Button(action: {
+                    openPDF(item: item)
+                }) {
+                    Label("Open in Full Screen", systemImage: "arrow.up.left.and.arrow.down.right")
+                }
+            }
         }
         .onTapGesture {
             if viewModel.selectionMode {
@@ -157,7 +173,7 @@ struct FileItemListView: View {
             } else if viewModel.editingItem == nil {
                 if item.type == .folder {
                     viewModel.navigateToFolder(item: item)
-                } else if item.type == .file {
+                } else if item.type == .file || item.type == .whiteboard {
                     openFile(item: item)
                 }
             }
@@ -168,33 +184,45 @@ struct FileItemListView: View {
                 viewModel.toggleSelection(item: item)
             }
         }
-        .sheet(isPresented: $showingPDFViewer) {
-            if viewModel.getPdfById(id: item.id) != nil {
-                PDFViewerView(pdfId: item.id, viewModel: viewModel)
+        .fullScreenCover(isPresented: $showingPDFViewer) {
+            if let pdfId = selectedPDFId {
+                PDFViewerView(pdfId: pdfId, viewModel: viewModel)
             }
         }
         .sheet(isPresented: $showingNoteEditor) {
-            NoteEditorView(noteId: item.id, viewModel: viewModel)
+            EnhancedNoteEditorView(noteId: item.id, viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingWhiteboard) {
+            WhiteboardView(viewModel: viewModel)
         }
     }
     
     private func openFile(item: FileSystemItem) {
-        if item.fileType == .pdf {
-            if let _ = viewModel.getPdfById(id: item.id) {
-                // Set the current document in the ViewModel
-                viewModel.currentDocument = DocumentItem(id: item.id, title: item.name)
-                
-                // Or use the local state approach
-                showingPDFViewer = true
+        if item.type == .file {
+            if item.fileType == .pdf {
+                openPDF(item: item)
+            } else if item.fileType == .note {
+                if viewModel.getNoteById(id: item.id) != nil {
+                    viewModel.currentDocument = DocumentItem(id: item.id, title: item.name)
+                    showingNoteEditor = true
+                }
             }
-        } else if item.fileType == .note {
-            if let _ = viewModel.getNoteById(id: item.id) {
-                // Set the current document in the ViewModel
+        } else if item.type == .whiteboard {
+            if viewModel.getWhiteboardById(id: item.id) != nil {
                 viewModel.currentDocument = DocumentItem(id: item.id, title: item.name)
-                
-                // Or use the local state approach
-                showingNoteEditor = true
+                showingWhiteboard = true
             }
+        }
+    }
+    
+    private func openPDF(item: FileSystemItem) {
+        if viewModel.getPdfById(id: item.id) != nil {
+            print("Opening PDF in full screen: \(item.id)")
+            selectedPDFId = item.id
+            showingPDFViewer = true
+            viewModel.openFile(item) // Track in recent files
+        } else {
+            print("❌ Error: PDF file not found!")
         }
     }
 }

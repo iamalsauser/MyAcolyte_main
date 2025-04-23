@@ -1,6 +1,7 @@
 import SwiftUI
 import PDFKit
 import UniformTypeIdentifiers
+import PencilKit
 
 // MARK: - Models
 struct FileSystemItem: Identifiable, Codable, Equatable {
@@ -11,27 +12,31 @@ struct FileSystemItem: Identifiable, Codable, Equatable {
     var parentId: String?
     var dateCreated: Date
     var dateModified: Date
+    var content: String?
     
     enum FileType: String, Codable {
         case file
         case folder
+        case whiteboard // ✅ Whiteboard is already here
     }
     
     enum FileContentType: String, Codable {
         case pdf
         case note
+        // Note: Not adding .whiteboard here, as it's handled by FileType
     }
     
     static func == (lhs: FileSystemItem, rhs: FileSystemItem) -> Bool {
         return lhs.id == rhs.id
     }
     
-    init(id: String, name: String, type: FileType, fileType: FileContentType? = nil, parentId: String? = nil) {
+    init(id: String, name: String, type: FileType, fileType: FileContentType? = nil, parentId: String? = nil, content: String? = nil) {
         self.id = id
         self.name = name
         self.type = type
         self.fileType = fileType
         self.parentId = parentId
+        self.content = content
         self.dateCreated = Date()
         self.dateModified = Date()
     }
@@ -40,6 +45,37 @@ struct FileSystemItem: Identifiable, Codable, Equatable {
 // MARK: - File System Storage Service
 class FileSystemStorageService {
     private let fileSystemKey = "fileSystem"
+    private let fileManager = FileManager.default
+    
+    private func getDocumentsDirectory() -> URL {
+        guard let directory = fileManager.urls(for: FileManager.SearchPathDirectory.documentDirectory,
+                                              in: FileManager.SearchPathDomainMask.userDomainMask).first else {
+            fatalError("Unable to access documents directory")
+        }
+        return directory
+    }
+    
+    func saveWhiteboard(id: String, drawing: PKDrawing) {
+        let fileURL = getDocumentsDirectory().appendingPathComponent("\(id).whiteboard")
+        do {
+            let data = drawing.dataRepresentation()
+            try data.write(to: fileURL)
+            print("✅ Whiteboard saved at: \(fileURL.absoluteString)")
+        } catch {
+            print("❌ Error saving whiteboard: \(error)")
+        }
+    }
+    
+    func getWhiteboardById(id: String) -> PKDrawing? {
+        let fileURL = getDocumentsDirectory().appendingPathComponent("\(id).whiteboard")
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return try PKDrawing(data: data)
+        } catch {
+            print("❌ Error loading whiteboard: \(error)")
+            return nil
+        }
+    }
     
     func saveFileSystem(_ fileSystem: [FileSystemItem]) {
         do {
@@ -66,7 +102,6 @@ class FileSystemStorageService {
     
     // MARK: - Document Storage
     
-    // Save PDF document
     func savePdf(id: String, pdfData: Data) {
         guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return
@@ -82,7 +117,6 @@ class FileSystemStorageService {
         }
     }
     
-    // Get PDF document
     func getPdfById(id: String) -> URL? {
         guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return nil
@@ -98,7 +132,6 @@ class FileSystemStorageService {
         }
     }
     
-    // Save Note
     func saveNote(id: String, content: String) {
         guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return
@@ -114,7 +147,6 @@ class FileSystemStorageService {
         }
     }
     
-    // Get Note
     func getNoteById(id: String) -> String? {
         guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return nil
@@ -130,35 +162,3 @@ class FileSystemStorageService {
         }
     }
 }
-
-// MARK: - ViewModel
-
-
-// MARK: - File Icons
-
-
-// MARK: - File Item Grid View
-
-
-// MARK: - File Item List View
-
-
-// MARK: - Path View
-
-
-// MARK: - Toolbar Items
-
-
-// MARK: - PDF Viewer
-
-// MARK: - Document Picker
-
-
-// MARK: - Note Editor View
-
-
-// MARK: - PDF Viewer View
-
-
-// MARK: - Main File System View
-

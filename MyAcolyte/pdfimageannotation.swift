@@ -15,6 +15,7 @@ class PDFImageAnnotation: PDFAnnotation {
 
     override func draw(with box: PDFDisplayBox, in context: CGContext) {
         UIGraphicsPushContext(context)
+        
         image.draw(in: bounds)
         UIGraphicsPopContext()
     }

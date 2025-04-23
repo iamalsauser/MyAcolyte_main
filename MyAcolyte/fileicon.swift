@@ -25,12 +25,17 @@ struct FileIcon: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .foregroundColor(Color(UIColor.systemRed))
-                } else {
+                } else if item.fileType == .note {
                     Image(systemName: "note.text")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .foregroundColor(Color(UIColor.systemGreen))
                 }
+            } else if item.type == .whiteboard { // ✅ Updated to check type instead of fileType
+                Image(systemName: "scribble")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(Color(UIColor.systemBlue))
             }
         }
         .frame(width: size, height: size)
