@@ -47,27 +47,6 @@ struct DocumentLibraryView: View {
         VStack(spacing: 0) {
             // Header with search and filters
             VStack(spacing: 12) {
-                // Header with title and add button
-                HStack {
-                    Text("Document Library")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        // Show document type menu for adding content
-                        showDocumentAddMenu()
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color.green)
-                            .clipShape(Circle())
-                    }
-                }
-                
                 // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -87,6 +66,7 @@ struct DocumentLibraryView: View {
                 .padding(8)
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(10)
+                .padding(.horizontal)
                 
                 // Document type selector
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -103,6 +83,7 @@ struct DocumentLibraryView: View {
                             )
                         }
                     }
+                    .padding(.horizontal)
                 }
                 
                 // Sort and layout controls
@@ -112,6 +93,21 @@ struct DocumentLibraryView: View {
                         .foregroundColor(.secondary)
                     
                     Spacer()
+                    
+                    Button(action: {
+                        showingDocumentPicker = true
+                    }) {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("New Upload")
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.green)
+                        .cornerRadius(12)
+                    }
                     
                     Menu {
                         ForEach(SortOption.allCases, id: \.self) { option in
@@ -135,9 +131,9 @@ struct DocumentLibraryView: View {
                         .foregroundColor(.secondary)
                     }
                 }
-                .padding(.top, 8)
+                .padding(.horizontal)
             }
-            .padding()
+            .padding(.top)
             .background(Color(.systemBackground))
             
             Divider()
@@ -148,49 +144,6 @@ struct DocumentLibraryView: View {
                     emptyStateView
                 } else {
                     documentsGrid
-                }
-            }
-            
-            // Floating action button for quick add
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Menu {
-                        Button(action: {
-                            viewModel.createNewNote()
-                            if let document = viewModel.currentDocument {
-                                selectedDocument = document
-                                showFullScreen = true
-                            }
-                        }) {
-                            Label("New Note", systemImage: "note.text.badge.plus")
-                        }
-                        
-                        Button(action: {
-                            viewModel.createNewWhiteboard()
-                            if let document = viewModel.currentDocument {
-                                selectedDocument = document
-                                showFullScreen = true
-                            }
-                        }) {
-                            Label("New Whiteboard", systemImage: "scribble")
-                        }
-                        
-                        Button(action: {
-                            showingDocumentPicker = true
-                        }) {
-                            Label("Import PDF", systemImage: "doc.badge.plus")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(16)
-                            .background(Circle().fill(Color.green))
-                            .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 2)
-                    }
-                    .padding()
                 }
             }
         }
@@ -228,7 +181,6 @@ struct DocumentLibraryView: View {
             }
         }
         .padding()
-        .padding(.bottom, 80) // Extra padding for the floating button
     }
     
     // Empty state
@@ -291,11 +243,6 @@ struct DocumentLibraryView: View {
         case .notes: return "Create notes for your study sessions"
         case .whiteboard: return "Create whiteboards for visual studying"
         }
-    }
-    
-    private func showDocumentAddMenu() {
-        // Show a menu to add different document types
-        // In a real app, this would show a popup or action sheet
     }
     
     private func addNewDocument() {
@@ -475,3 +422,42 @@ struct TypeTag: View {
             .cornerRadius(4)
     }
 }
+
+// MARK: - Document Picker
+
+//struct DocumentPicker: UIViewControllerRepresentable {
+//    @Binding var showPicker: Bool
+//    var onPick: (URL) -> Void
+//    
+//    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+//        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
+//        picker.allowsMultipleSelection = false
+//        picker.delegate = context.coordinator
+//        return picker
+//    }
+//    
+//    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+//    
+//    func makeCoordinator() -> Coordinator {
+//        Coordinator(self)
+//    }
+//    
+//    class Coordinator: NSObject, UIDocumentPickerDelegate {
+//        let parent: DocumentPicker
+//        
+//        init(_ parent: DocumentPicker) {
+//            self.parent = parent
+//        }
+//        
+//        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+//            if let url = urls.first {
+//                parent.onPick(url)
+//            }
+//            parent.showPicker = false
+//        }
+//        
+//        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+//            parent.showPicker = false
+//        }
+//    }
+//}

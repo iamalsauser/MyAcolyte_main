@@ -17,13 +17,12 @@ struct FileSystemItem: Identifiable, Codable, Equatable {
     enum FileType: String, Codable {
         case file
         case folder
-        case whiteboard // ✅ Whiteboard is already here
+        case whiteboard
     }
     
     enum FileContentType: String, Codable {
         case pdf
         case note
-        // Note: Not adding .whiteboard here, as it's handled by FileType
     }
     
     static func == (lhs: FileSystemItem, rhs: FileSystemItem) -> Bool {
@@ -159,6 +158,34 @@ class FileSystemStorageService {
         } catch {
             print("Error loading note: \(error)")
             return nil
+        }
+    }
+    
+    func deleteItemFromDisk(id: String, type: FileSystemItem.FileType, fileType: FileSystemItem.FileContentType? = nil) {
+        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return
+        }
+        
+        var fileExtension = ""
+        if type == .whiteboard {
+            fileExtension = ".whiteboard"
+        } else if type == .file {
+            if fileType == .pdf {
+                fileExtension = ".pdf"
+            } else if fileType == .note {
+                fileExtension = ".notes"
+            }
+        }
+        
+        let fileURL = documentsDirectory.appendingPathComponent("\(id)\(fileExtension)")
+        
+        do {
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                try FileManager.default.removeItem(at: fileURL)
+                print("File deleted successfully: \(fileURL)")
+            }
+        } catch {
+            print("Error deleting file: \(error)")
         }
     }
 }

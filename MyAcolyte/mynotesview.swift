@@ -54,56 +54,22 @@ struct MyNotesView: View {
         VStack(spacing: 0) {
             // Header with search
             VStack(spacing: 12) {
-                // Title and Create button
-                HStack {
-                    Text("My Notes")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.createNewNote()
-                        
-                        // Access the created note
-                        if let document = viewModel.currentDocument {
-                            selectedDocument = document
-                            showFullScreen = true
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("New Note")
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
-                }
-                
                 // Search bar
                 HStack {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                        
-                        TextField("Search notes", text: $searchText)
-                            .foregroundColor(.primary)
-                        
-                        if !searchText.isEmpty {
-                            Button(action: {
-                                searchText = ""
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                            }
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    
+                    TextField("Search notes", text: $searchText)
+                        .foregroundColor(.primary)
+                    
+                    if !searchText.isEmpty {
+                        Button(action: {
+                            searchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
                         }
                     }
-                    .padding(8)
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(10)
                     
                     // Sort options
                     Menu {
@@ -127,8 +93,35 @@ struct MyNotesView: View {
                             .cornerRadius(10)
                     }
                 }
+                .padding(8)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+                .padding(.horizontal)
+                
+                // New note button
+                Button(action: {
+                    viewModel.createNewNote()
+                    
+                    // Access the created note
+                    if let document = viewModel.currentDocument {
+                        selectedDocument = document
+                        showFullScreen = true
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "plus")
+                        Text("New Note")
+                    }
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.green)
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal)
             }
-            .padding()
+            .padding(.top)
             .background(Color(.systemBackground))
             
             // Category tabs
@@ -211,7 +204,6 @@ struct MyNotesView: View {
                     }
                 }
                 .padding()
-                .padding(.bottom, 100) // Add extra padding at bottom for tab bar
             }
         }
         .onAppear {
@@ -220,7 +212,7 @@ struct MyNotesView: View {
         .fullScreenCover(item: $selectedDocument) { document in
             if let item = viewModel.fileSystem.first(where: { $0.id == document.id }) {
                 if item.fileType == .note {
-                    // Use our enhanced note editor instead of the original one
+                    // Use our enhanced note editor
                     EnhancedNoteEditorView(noteId: item.id, viewModel: viewModel)
                 } else {
                     Text("Error: Document Not Found")

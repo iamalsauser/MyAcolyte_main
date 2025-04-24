@@ -16,27 +16,46 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // App Information Section
-                VStack(alignment: .center, spacing: 12) {
-                    Image("logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 80, height: 80)
+                // User profile section
+                VStack(spacing: 16) {
+                    // Profile image
+                    Image(systemName: "person.crop.circle.fill")
+                        .font(.system(size: 80))
+                        .foregroundColor(.green)
                     
-                    Text("MyAcolyte")
-                        .font(.title)
+                    Text("Student Profile")
+                        .font(.title2)
                         .fontWeight(.bold)
                     
-                    Text("Version 1.0.0")
+                    Text("Medical Student")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                    
+                    // Stats row
+                    HStack(spacing: 20) {
+                        StatItem(value: "23h", label: "Study Time")
+                        
+                        Divider()
+                            .frame(height: 40)
+                        
+                        StatItem(value: "75%", label: "Progress")
+                        
+                        Divider()
+                            .frame(height: 40)
+                        
+                        StatItem(value: "12", label: "Documents")
+                    }
+                    .padding(.vertical, 8)
                 }
                 .padding()
-                .frame(maxWidth: .infinity)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .padding(.horizontal)
                 
                 // Appearance Settings
                 SettingsSection(title: "Appearance", systemImage: "paintbrush") {
                     Toggle("Dark Mode", isOn: $darkModeEnabled)
+                        .padding(.vertical, 4)
                         .onChange(of: darkModeEnabled) { _, _ in
                             // This would need to be connected to a theme manager in a real app
                         }
@@ -55,38 +74,34 @@ struct SettingsView: View {
                 
                 // File Management Settings
                 SettingsSection(title: "File Management", systemImage: "folder") {
-                    Picker("Default Sort Order", selection: $sortPreference) {
-                        Text("Name (A-Z)").tag(0)
-                        Text("Name (Z-A)").tag(1)
-                        Text("Newest First").tag(2)
-                        Text("Oldest First").tag(3)
-                        Text("Recently Modified").tag(4)
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    .onChange(of: sortPreference) { _, newValue in
-                        switch newValue {
-                        case 0: viewModel.changeSortOrder(.nameAscending)
-                        case 1: viewModel.changeSortOrder(.nameDescending)
-                        case 2: viewModel.changeSortOrder(.dateCreatedNewest)
-                        case 3: viewModel.changeSortOrder(.dateCreatedOldest)
-                        case 4: viewModel.changeSortOrder(.dateModifiedNewest)
-                        default: viewModel.changeSortOrder(.nameAscending)
+                    LabeledSettingRow(label: "Default Sort Order") {
+                        Picker("", selection: $sortPreference) {
+                            Text("Name (A-Z)").tag(0)
+                            Text("Name (Z-A)").tag(1)
+                            Text("Newest First").tag(2)
+                            Text("Oldest First").tag(3)
                         }
+                        .pickerStyle(MenuPickerStyle())
+                        .labelsHidden()
                     }
                     
                     Divider()
                     
-                    Picker("Auto-Save Interval (minutes)", selection: $autoSaveInterval) {
-                        ForEach(0..<autoSaveOptions.count, id: \.self) { index in
-                            Text("\(autoSaveOptions[index]) min").tag(autoSaveOptions[index])
+                    LabeledSettingRow(label: "Auto-Save Interval") {
+                        Picker("", selection: $autoSaveInterval) {
+                            ForEach(autoSaveOptions, id: \.self) { minute in
+                                Text("\(minute) min").tag(minute)
+                            }
                         }
+                        .pickerStyle(MenuPickerStyle())
+                        .labelsHidden()
                     }
-                    .pickerStyle(MenuPickerStyle())
                 }
                 
                 // Notifications Settings
                 SettingsSection(title: "Notifications", systemImage: "bell") {
                     Toggle("Enable Notifications", isOn: $notificationsEnabled)
+                        .padding(.vertical, 4)
                         .onChange(of: notificationsEnabled) { _, newValue in
                             if newValue {
                                 requestNotificationPermission()
@@ -95,37 +110,44 @@ struct SettingsView: View {
                     
                     Divider()
                     
-                    Toggle("File Import Notifications", isOn: .constant(true))
+                    Toggle("Study Reminders", isOn: .constant(true))
+                        .padding(.vertical, 4)
                         .disabled(!notificationsEnabled)
                     
-                    Toggle("File Edit Notifications", isOn: .constant(true))
+                    Toggle("New Content Alerts", isOn: .constant(true))
+                        .padding(.vertical, 4)
                         .disabled(!notificationsEnabled)
                 }
                 
-                // Account Section (Placeholder for future functionality)
+                // Account Section
                 SettingsSection(title: "Account", systemImage: "person.circle") {
-                    Button(action: {
-                        // Sign In Action (Placeholder)
-                    }) {
-                        HStack {
-                            Text("Sign In")
-                            Spacer()
-                            Image(systemName: "arrow.right.circle")
-                        }
+                    NavigationButton(
+                        label: "Study Progress",
+                        icon: "chart.bar.fill",
+                        color: .green
+                    ) {
+                        // Navigate to Study Progress screen
                     }
                     
                     Divider()
                     
-                    Button(action: {
-                        // Sync Action (Placeholder)
-                    }) {
-                        HStack {
-                            Text("Cloud Sync")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("Off")
-                                .foregroundColor(.secondary)
-                        }
+                    NavigationButton(
+                        label: "Achievements",
+                        icon: "medal",
+                        color: .orange
+                    ) {
+                        // Navigate to Achievements screen
+                    }
+                    
+                    Divider()
+                    
+                    NavigationButton(
+                        label: "Cloud Sync",
+                        icon: "cloud",
+                        color: .blue,
+                        value: "Off"
+                    ) {
+                        // Navigate to Cloud Sync settings
                     }
                 }
                 
@@ -149,7 +171,7 @@ struct SettingsView: View {
                                 
                                 Rectangle()
                                     .frame(width: geometry.size.width * 0.32, height: 8)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(.green)
                             }
                             .cornerRadius(4)
                         }
@@ -167,9 +189,9 @@ struct SettingsView: View {
                             Spacer()
                             
                             VStack(alignment: .leading) {
-                                Text("Whiteboards")
+                                Text("Notes")
                                     .font(.subheadline)
-                                Text("1.2 GB")
+                                Text("0.2 GB")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -177,9 +199,9 @@ struct SettingsView: View {
                             Spacer()
                             
                             VStack(alignment: .leading) {
-                                Text("Notes")
+                                Text("Whiteboards")
                                     .font(.subheadline)
-                                Text("0.2 GB")
+                                Text("1.2 GB")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -194,7 +216,7 @@ struct SettingsView: View {
                     }) {
                         HStack {
                             Text("Clean Cache")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.green)
                             Spacer()
                             Text("156 MB")
                                 .foregroundColor(.secondary)
@@ -204,87 +226,54 @@ struct SettingsView: View {
                 
                 // Support Section
                 SettingsSection(title: "Support", systemImage: "questionmark.circle") {
-                    Button(action: {
-                        // Help Center
+                    NavigationButton(
+                        label: "Help Center",
+                        icon: "lifepreserver",
+                        color: .purple
+                    ) {
+                        // Navigate to help center
                         if let url = URL(string: "https://help.myacolyte.com") {
                             UIApplication.shared.open(url)
-                        }
-                    }) {
-                        HStack {
-                            Text("Help Center")
-                            Spacer()
-                            Image(systemName: "arrow.up.right.square")
-                                .foregroundColor(.secondary)
                         }
                     }
                     
                     Divider()
                     
-                    Button(action: {
+                    NavigationButton(
+                        label: "Contact Support",
+                        icon: "envelope",
+                        color: .blue
+                    ) {
                         // Contact Support
                         if let url = URL(string: "mailto:support@myacolyte.com") {
                             UIApplication.shared.open(url)
                         }
-                    }) {
-                        HStack {
-                            Text("Contact Support")
-                            Spacer()
-                            Image(systemName: "envelope")
-                                .foregroundColor(.secondary)
-                        }
                     }
                     
                     Divider()
                     
-                    Button(action: {
-                        // Privacy Policy
+                    NavigationButton(
+                        label: "Privacy Policy",
+                        icon: "lock.shield",
+                        color: .gray
+                    ) {
+                        // Open privacy policy
                         if let url = URL(string: "https://myacolyte.com/privacy") {
                             UIApplication.shared.open(url)
                         }
-                    }) {
-                        HStack {
-                            Text("Privacy Policy")
-                            Spacer()
-                            Image(systemName: "arrow.up.right.square")
-                                .foregroundColor(.secondary)
-                        }
                     }
                 }
                 
-                // Reset Section
-                SettingsSection(title: "Reset", systemImage: "arrow.counterclockwise") {
-                    Button(action: {
-                        isShowingResetConfirmation = true
-                    }) {
-                        HStack {
-                            Text("Reset All Settings")
-                                .foregroundColor(.red)
-                            Spacer()
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    Button(action: {
-                        isShowingResetConfirmation = true
-                    }) {
-                        HStack {
-                            Text("Clear All Data")
-                                .foregroundColor(.red)
-                            Spacer()
-                        }
-                    }
-                }
-                
-                Text("© 2025 MyAcolyte. All rights reserved.")
+                // Version info
+                Text("Version 1.0.0")
                     .font(.footnote)
                     .foregroundColor(.secondary)
                     .padding(.top, 20)
                     .padding(.bottom, 40)
             }
-            .padding()
+            .padding(.vertical)
         }
-        .navigationTitle("Settings")
+        .navigationTitle("Profile")
         .alert("Reset Confirmation", isPresented: $isShowingResetConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {
@@ -327,6 +316,23 @@ struct SettingsView: View {
 
 // MARK: - Supporting Views
 
+struct StatItem: View {
+    let value: String
+    let label: String
+    
+    var body: some View {
+        VStack {
+            Text(value)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.green)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
 struct SettingsSection<Content: View>: View {
     let title: String
     let systemImage: String
@@ -343,7 +349,7 @@ struct SettingsSection<Content: View>: View {
             HStack {
                 Image(systemName: systemImage)
                     .font(.system(size: 18))
-                    .foregroundColor(.blue)
+                    .foregroundColor(.green)
                     .frame(width: 26, height: 26)
                 
                 Text(title)
@@ -355,7 +361,63 @@ struct SettingsSection<Content: View>: View {
                 .padding(.leading, 8)
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+        .padding(.horizontal)
+    }
+}
+
+struct LabeledSettingRow<Content: View>: View {
+    let label: String
+    let content: Content
+    
+    init(label: String, @ViewBuilder content: () -> Content) {
+        self.label = label
+        self.content = content()
+    }
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            content
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct NavigationButton: View {
+    let label: String
+    let icon: String
+    let color: Color
+    var value: String? = nil
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .frame(width: 24, height: 24)
+                
+                Text(label)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                if let value = value {
+                    Text(value)
+                        .foregroundColor(.secondary)
+                }
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 6)
+        }
     }
 }

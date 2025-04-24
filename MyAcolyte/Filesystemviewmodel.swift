@@ -108,7 +108,7 @@ class FileSystemViewModel: ObservableObject {
     func loadFileSystem() {
         fileSystem = storageService.loadFileSystem()
         if fileSystem.isEmpty {
-            let documentsFolder = MyAcolyte.FileSystemItem(
+            let documentsFolder = FileSystemItem(
                 id: UUID().uuidString,
                 name: "Documents",
                 type: .folder
@@ -193,7 +193,7 @@ class FileSystemViewModel: ObservableObject {
     // MARK: - User Actions
     
     func createFolder() {
-        let newFolder = MyAcolyte.FileSystemItem(
+        let newFolder = FileSystemItem(
             id: UUID().uuidString,
             name: "New Folder",
             type: .folder,
@@ -231,13 +231,13 @@ class FileSystemViewModel: ObservableObject {
                 if fileSystem[i].type == .file {
                     let fileExtension = fileSystem[i].fileType == .pdf ? ".pdf" : ".notes"
                     fileSystem[i].name = newName.hasSuffix(fileExtension) ?
-                        newName.trimmingCharacters(in: .whitespacesAndNewlines) :
-                        "\(newName.trimmingCharacters(in: .whitespacesAndNewlines))\(fileExtension)"
+                    newName.trimmingCharacters(in: .whitespacesAndNewlines) :
+                    "\(newName.trimmingCharacters(in: .whitespacesAndNewlines))\(fileExtension)"
                 } else if fileSystem[i].type == .whiteboard {
                     let fileExtension = ".whiteboard"
                     fileSystem[i].name = newName.hasSuffix(fileExtension) ?
-                        newName.trimmingCharacters(in: .whitespacesAndNewlines) :
-                        "\(newName.trimmingCharacters(in: .whitespacesAndNewlines))\(fileExtension)"
+                    newName.trimmingCharacters(in: .whitespacesAndNewlines) :
+                    "\(newName.trimmingCharacters(in: .whitespacesAndNewlines))\(fileExtension)"
                 } else {
                     fileSystem[i].name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
                 }
@@ -324,7 +324,7 @@ class FileSystemViewModel: ObservableObject {
             
             storageService.savePdf(id: documentId, pdfData: data)
             
-            let newFile = MyAcolyte.FileSystemItem(
+            let newFile = FileSystemItem(
                 id: documentId,
                 name: fileName,
                 type: .file,
@@ -355,7 +355,7 @@ class FileSystemViewModel: ObservableObject {
         
         storageService.saveNote(id: documentId, content: "")
         
-        let newFile = MyAcolyte.FileSystemItem(
+        let newFile = FileSystemItem(
             id: documentId,
             name: fileName,
             type: .file,
@@ -377,7 +377,7 @@ class FileSystemViewModel: ObservableObject {
         let emptyDrawing = PKDrawing()
         storageService.saveWhiteboard(id: documentId, drawing: emptyDrawing)
         
-        let newFile = MyAcolyte.FileSystemItem(
+        let newFile = FileSystemItem(
             id: documentId,
             name: fileName,
             type: .whiteboard,
@@ -426,20 +426,7 @@ class FileSystemViewModel: ObservableObject {
     }
     
     func getPdfById(id: String) -> URL? {
-        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("❌ Error: Documents directory not found!")
-            return nil
-        }
-
-        let fileURL = documentsDirectory.appendingPathComponent("\(id).pdf")
-
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            print("✅ PDF found at: \(fileURL.absoluteString)")
-            return fileURL
-        } else {
-            print("❌ PDF file not found for id: \(id)")
-            return nil
-        }
+        return storageService.getPdfById(id: id)
     }
     
     func getNoteById(id: String) -> String? {
@@ -454,13 +441,13 @@ class FileSystemViewModel: ObservableObject {
     
     func addSampleData() {
         // Add some sample folders and files for anatomy studies
-        let anatomyFolder = MyAcolyte.FileSystemItem(
+        let anatomyFolder = FileSystemItem(
             id: UUID().uuidString,
             name: "Anatomy",
             type: .folder
         )
         
-        let physiologyFolder = MyAcolyte.FileSystemItem(
+        let physiologyFolder = FileSystemItem(
             id: UUID().uuidString,
             name: "Physiology",
             type: .folder
@@ -486,7 +473,7 @@ class FileSystemViewModel: ObservableObject {
             let documentId = UUID().uuidString
             let fileName = "\(name).pdf"
             
-            let newFile = MyAcolyte.FileSystemItem(
+            let newFile = FileSystemItem(
                 id: documentId,
                 name: fileName,
                 type: .file,
@@ -512,6 +499,63 @@ class FileSystemViewModel: ObservableObject {
             if name == "Unit 9 - Anatomy" || name == "Unit 8 - Special Senses" || name == "Unit 7 - Nervous System" {
                 addToRecentFiles(newFile)
             }
+        }
+        
+        // Add sample notes
+        let noteNames = [
+            "Anatomy Lecture Notes",
+            "Physiology Study Summary",
+            "Medical Terminology",
+            "Clinical Case Studies"
+        ]
+        
+        for name in noteNames {
+            let documentId = UUID().uuidString
+            let fileName = "\(name).notes"
+            
+            let content = "# \(name)\n\nThese are sample study notes for the medical curriculum.\n\n## Key Points\n\n- Important concept 1\n- Important concept 2\n- Important concept 3\n\n## References\n\n1. Textbook A\n2. Textbook B\n3. Online resource C"
+            
+            storageService.saveNote(id: documentId, content: content)
+            
+            let newFile = FileSystemItem(
+                id: documentId,
+                name: fileName,
+                type: .file,
+                fileType: .note,
+                parentId: nil
+            )
+            
+            fileSystem.append(newFile)
+            
+            // Add some to recent files
+            if name == "Anatomy Lecture Notes" {
+                addToRecentFiles(newFile)
+            }
+        }
+        
+        // Add sample whiteboards
+        let whiteboardNames = [
+            "Anatomy Diagram",
+            "Physiology Flowchart",
+            "Brain Structure"
+        ]
+        
+        for name in whiteboardNames {
+            let documentId = UUID().uuidString
+            let fileName = "\(name).whiteboard"
+            
+            let emptyDrawing = PKDrawing()
+            storageService.saveWhiteboard(id: documentId, drawing: emptyDrawing)
+            
+            let newFile = FileSystemItem(
+                id: documentId,
+                name: fileName,
+                type: .whiteboard,
+                fileType: nil,
+                parentId: nil
+            )
+            
+            fileSystem.append(newFile)
         }
         
         saveFileSystem()
