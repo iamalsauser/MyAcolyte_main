@@ -723,9 +723,41 @@ struct EnhancedNoteEditorView: View {
             VStack(spacing: 24) {
                 // Summary stats
                 HStack(spacing: 20) {
-                    StatCard(title: "Words", value: "\(wordCount)", icon: "textformat")
-                    StatCard(title: "Characters", value: "\(characterCount)", icon: "character")
-                    StatCard(title: "Flashcards", value: "\(flashcards.count)", icon: "rectangle.on.rectangle")
+                    StatCard(title: "Words") {
+                        HStack {
+                            Image(systemName: "textformat")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            
+                            Text("\(wordCount)")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
+                    }
+
+                    StatCard(title: "Characters") {
+                        HStack {
+                            Image(systemName: "character")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            
+                            Text("\(characterCount)")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
+                    }
+
+                    StatCard(title: "Flashcards") {
+                        HStack {
+                            Image(systemName: "rectangle.on.rectangle")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            
+                            Text("\(flashcards.count)")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
+                    }
                 }
                 .padding(.horizontal)
                 
@@ -1721,31 +1753,31 @@ struct EnhancedNoteEditorView: View {
                                           }
                                       }
 
-                                      struct StatCard: View {
-                                          let title: String
-                                          let value: String
-                                          let icon: String
-                                          
-                                          var body: some View {
-                                              VStack(spacing: 8) {
-                                                  Image(systemName: icon)
-                                                      .font(.system(size: 24))
-                                                      .foregroundColor(.blue)
-                                                  
-                                                  Text(value)
-                                                      .font(.system(size: 24, weight: .bold))
-                                                      .foregroundColor(.primary)
-                                                  
-                                                  Text(title)
-                                                      .font(.caption)
-                                                      .foregroundColor(.secondary)
-                                              }
-                                              .frame(maxWidth: .infinity)
-                                              .padding()
-                                              .background(Color(UIColor.secondarySystemBackground))
-                                              .cornerRadius(12)
-                                          }
-                                      }
+//                                      struct StatCard: View {
+//                                          let title: String
+//                                          let value: String
+//                                          let icon: String
+//                                          
+//                                          var body: some View {
+//                                              VStack(spacing: 8) {
+//                                                  Image(systemName: icon)
+//                                                      .font(.system(size: 24))
+//                                                      .foregroundColor(.blue)
+//                                                  
+//                                                  Text(value)
+//                                                      .font(.system(size: 24, weight: .bold))
+//                                                      .foregroundColor(.primary)
+//                                                  
+//                                                  Text(title)
+//                                                      .font(.caption)
+//                                                      .foregroundColor(.secondary)
+//                                              }
+//                                              .frame(maxWidth: .infinity)
+//                                              .padding()
+//                                              .background(Color(UIColor.secondarySystemBackground))
+//                                              .cornerRadius(12)
+//                                          }
+//                                      }
 
                                       // Array of medical symbols for the symbol palette
                                       let medicalSymbols = [
