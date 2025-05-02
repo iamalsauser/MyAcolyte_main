@@ -1,5 +1,6 @@
 Home Page:
-<img width="958" alt="image" src="https://github.com/user-attachments/assets/67606394-f911-4d31-87e4-e3069db8c1e4" />
+<img width="941" alt="image" src="https://github.com/user-attachments/assets/fb7f4d6b-80e9-4f75-b63c-fb783bc3b356" />
+
 
 My PDF:
 <img width="958" alt="image" src="https://github.com/user-attachments/assets/348f56a7-0f16-4dc9-87be-6d5ab79cc348" />
